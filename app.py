@@ -1,3 +1,36 @@
+# ==========================================
+# 🔴 核心修复：自定义模块自动注入
+# 这段代码会自动把你的 custom_block.py 里的所有类
+# 挂载到 ultralytics 库中，让模型能识别它们
+# ==========================================
+import sys
+import os
+
+# 1. 确保当前目录在系统路径中
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+try:
+    # 2. 导入你写的包含所有自定义类的文件
+    from my_modules import custom_block
+
+    # 3. 获取 ultralytics 的 block 模块对象
+    import ultralytics.nn.modules.block as ul_block
+
+    # 4. 自动遍历 custom_block 里的所有类，并挂载到 ultralytics 里
+    for name in dir(custom_block):
+        obj = getattr(custom_block, name)
+        # 判断是否是类定义，如果是，就挂载过去
+        if isinstance(obj, type):
+            setattr(ul_block, name, obj)
+
+    print("✅ 成功注入所有自定义模块！")
+
+except Exception as e:
+    print(f"❌ 注入自定义模块失败: {e}")
+
+
+
+
 import streamlit as st
 import cv2
 import numpy as np
